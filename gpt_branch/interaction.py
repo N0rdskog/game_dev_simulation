@@ -1,11 +1,11 @@
 import json
 import random
 from datetime import datetime, timedelta
-from game_designer import GameDesigner
-from developer import Developer
-from artist import Artist
-from tester import Tester
-from player import Player
+from agents.game_designer import GameDesigner
+from agents.developer import Developer
+from agents.artist import Artist
+from agents.tester import Tester
+from agents.player import Player
 from tic_tac_toe import TicTacToe
 
 class InteractionManager:
@@ -33,26 +33,8 @@ class InteractionManager:
         developer.receive_message(message_to_dev)
         artist.receive_message(message_to_artist)
 
-        # Designer generates dynamic tasks
-        tasks = designer.generate_tasks()
-        due_date = datetime.now() + timedelta(days=7)
-        for task_info in tasks:
-            task_description = task_info["description"]
-            task_role = task_info["role"]
-            task_priority = task_info["priority"]
-
-            if task_role == "Developer":
-                task_to_dev = designer.create_task(task_description, developer, due_date, task_priority)
-                message_to_dev_task = designer.send_message(developer, "task_assignment", task_to_dev.to_dict())
-                developer.receive_message(message_to_dev_task)
-            elif task_role == "Artist":
-                task_to_artist = designer.create_task(task_description, artist, due_date, task_priority)
-                message_to_artist_task = designer.send_message(artist, "task_assignment", task_to_artist.to_dict())
-                artist.receive_message(message_to_artist_task)
-            elif task_role == "Tester":
-                task_to_tester = designer.create_task(task_description, tester, due_date, task_priority)
-                message_to_tester_task = designer.send_message(tester, "task_assignment", task_to_tester.to_dict())
-                tester.receive_message(message_to_tester_task)
+        # Designer assigns tasks dynamically
+        designer.assign_tasks(self.agents)
 
         # Agents work on their tasks
         developer.update_task_status("Implement game mechanics", "In Progress")
