@@ -1,4 +1,4 @@
-from agent import Agent
+from agents.agent import Agent
 from task import Task
 
 class GameDesigner(Agent):
@@ -20,12 +20,17 @@ class GameDesigner(Agent):
     def process_message(self, message):
         if message['type'] == 'feedback':
             print(f"{self.name} is processing feedback: {message['content']}")
+            # Iterate on the design based on feedback
+            self.iterate_on_design(message['content'])
         elif message['type'] == 'task_status':
             print(f"Task status update from {message['sender']}: {message['content']}")
         elif message['type'] == 'performance_update':
             quality, speed = message['content']['quality'], message['content']['speed']
             self.update_performance(quality, speed)
 
+    def iterate_on_design(self, feedback):
+        # Implement design iteration logic based on feedback
+        print(f"{self.name} is iterating on the design based on feedback: {feedback}")
     def generate_tasks(self):
         tasks = [
             {"description": "Implement game mechanics", "role": "Developer", "priority": "High"},

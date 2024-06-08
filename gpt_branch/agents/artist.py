@@ -15,5 +15,8 @@ class Artist(Agent):
             task = Task(message['content']['description'], self, message['content']['due_date'], message['content']['priority'])
             self.add_task(task)
             print(f"{self.name} received a new task: {task.description}")
-        elif message['type'] == 'task_status_request':
-            self.report_task_status()
+        elif message['type'] == 'task_status':
+            print(f"Task status update: {message['content']}")
+        elif message['type'] == 'performance_update':
+            quality, speed = message['content']['quality'], message['content']['speed']
+            self.update_performance(quality, speed)
