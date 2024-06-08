@@ -6,6 +6,7 @@ from developer import Developer
 from artist import Artist
 from tester import Tester
 from player import Player
+from tic_tac_toe import TicTacToe
 
 class InteractionManager:
     def __init__(self):
@@ -77,11 +78,12 @@ class InteractionManager:
         print(json.dumps(test_report, indent=2))
 
         # Player plays the game and provides feedback
-        player_feedback = player.play_game(game_code, game_assets)
+        game = TicTacToe()  # Initialize TicTacToe game
+        player_feedback = player.play_game(game)
         print(json.dumps(player_feedback, indent=2))
 
         # Player trains to improve skills
-        player.train()
+        player.train(game)
 
         # Performance metrics update
         self.update_performance_metrics()

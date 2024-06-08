@@ -1,56 +1,43 @@
-import random
 from agent import Agent
 from task import Task
-from tic_tac_toe import TicTacToe
+from game_interface import GameInterface
+import random
 
 class Player(Agent):
     def __init__(self, name):
         super().__init__(name, "Player")
         self.skill_level = 0
 
-    def play_game(self, game, letter):
+    def play_game(self, game: GameInterface):
+        game.reset()
         game_over = False
         while not game_over:
-            if game.num_empty_squares() == 0:
+            event = self.get_next_event(game)
+            game.handle_event(event)
+            game.update()
+            if game.is_over():
                 game_over = True
-                break
-            if letter == 'X':
-                move = self.get_best_move(game, letter)
-                game.make_move(move, letter)
-                if game.current_winner:
-                    game_over = True
-                    break
-                letter = 'O'
-            else:
-                move = random.choice(game.available_moves())
-                game.make_move(move, letter)
-                if game.current_winner:
-                    game_over = True
-                    break
-                letter = 'X'
-        if game.current_winner == 'X':
+        if game.get_winner() == 1:
             self.skill_level += 1
-        return {"type": "player_feedback", "content": f"Played game with result: {game.current_winner}"}
+        return {"type": "player_feedback", "content": f"Played game with result: {game.get_winner()}"}
 
-    def train(self, iterations=100):
+    def get_next_event(self, game: GameInterface):
+        available_moves = self.get_available_moves(game)
+        move = random.choice(available_moves)
+        return (move[0], move[1], 1)  # Assuming player is always 1 for simplicity
+
+    def get_available_moves(self, game: GameInterface):
+        state = game.get_state()
+        moves = []
+        for row in range(state.shape[0]):
+            for col in range(state.shape[1]):
+                if state[row][col] == 0:
+                    moves.append((row, col))
+        return moves
+
+    def train(self, game: GameInterface, iterations=100):
         for _ in range(iterations):
-            game = TicTacToe()
-            self.play_game(game, 'X')
-
-    def get_best_move(self, game, letter):
-        best_score = -float('inf')
-        best_move = None
-        for possible_move in game.available_moves():
-            game.make_move(possible_move, letter)
-            if game.current_winner:
-                score = 1
-            else:
-                score = 0
-            game.board[possible_move] = ' '
-            if score > best_score:
-                best_score = score
-                best_move = possible_move
-        return best_move
+            self.play_game(game)
 
     def process_message(self, message):
         if message['type'] == 'game_code':

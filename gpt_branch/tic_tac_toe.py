@@ -1,49 +1,40 @@
-class TicTacToe:
+import numpy as np
+from game_interface import GameInterface
+
+class TicTacToe(GameInterface):
     def __init__(self):
-        self.board = [' ' for _ in range(9)]
+        self.reset()
+
+    def reset(self):
+        self.board = np.zeros((3, 3))
         self.current_winner = None
 
-    def print_board(self):
-        for row in [self.board[i * 3:(i + 1) * 3] for i in range(3)]:
-            print('| ' + ' | '.join(row) + ' |')
-
-    @staticmethod
-    def print_board_nums():
-        number_board = [[str(i) for i in range(j * 3, (j + 1) * 3)] for j in range(3)]
-        for row in number_board:
-            print('| ' + ' | '.join(row) + ' |')
-
-    def make_move(self, square, letter):
-        if self.board[square] == ' ':
-            self.board[square] = letter
-            if self.winner(square, letter):
-                self.current_winner = letter
+    def handle_event(self, event):
+        row, col, player = event
+        if self.board[row][col] == 0:
+            self.board[row][col] = player
+            if self.check_winner(row, col, player):
+                self.current_winner = player
             return True
         return False
 
-    def winner(self, square, letter):
-        row_ind = square // 3
-        row = self.board[row_ind * 3:(row_ind + 1) * 3]
-        if all([s == letter for s in row]):
+    def check_winner(self, row, col, player):
+        if np.all(self.board[row, :] == player) or np.all(self.board[:, col] == player):
             return True
-        col_ind = square % 3
-        column = [self.board[col_ind + i * 3] for i in range(3)]
-        if all([s == letter for s in column]):
+        if row == col and np.all(np.diag(self.board) == player):
             return True
-        if square % 2 == 0:
-            diagonal1 = [self.board[i] for i in [0, 4, 8]]
-            if all([s == letter for s in diagonal1]):
-                return True
-            diagonal2 = [self.board[i] for i in [2, 4, 6]]
-            if all([s == letter for s in diagonal2]):
-                return True
+        if row + col == 2 and np.all(np.diag(np.fliplr(self.board)) == player):
+            return True
         return False
 
-    def empty_squares(self):
-        return ' ' in self.board
+    def update(self):
+        pass  # No continuous state updates needed for Tic-Tac-Toe
 
-    def num_empty_squares(self):
-        return self.board.count(' ')
+    def get_state(self):
+        return self.board.copy()
 
-    def available_moves(self):
-        return [i for i, x in enumerate(self.board) if x == ' ']
+    def is_over(self):
+        return self.current_winner is not None or np.all(self.board != 0)
+
+    def get_winner(self):
+        return self.current_winner
