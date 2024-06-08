@@ -1,4 +1,4 @@
-from agents.agent import Agent
+from agent import Agent
 from task import Task
 
 class GameDesigner(Agent):
