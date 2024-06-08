@@ -25,3 +25,11 @@ class GameDesigner(Agent):
         elif message['type'] == 'performance_update':
             quality, speed = message['content']['quality'], message['content']['speed']
             self.update_performance(quality, speed)
+
+    def generate_tasks(self):
+        tasks = [
+            {"description": "Implement game mechanics", "role": "Developer", "priority": "High"},
+            {"description": "Create visual assets", "role": "Artist", "priority": "High"},
+            {"description": "Test game functionality", "role": "Tester", "priority": "High"}
+        ]
+        return tasks
