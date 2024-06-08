@@ -33,19 +33,30 @@ class InteractionManager:
         developer.receive_message(message_to_dev)
         artist.receive_message(message_to_artist)
 
-        # Designer assigns tasks to Developer and Artist
+        # Designer generates dynamic tasks
+        tasks = designer.generate_tasks()
         due_date = datetime.now() + timedelta(days=7)
-        task_to_dev = designer.create_task("Implement game mechanics", developer, due_date, "High")
-        task_to_artist = designer.create_task("Create character sprites", artist, due_date, "High")
-        message_to_dev_task = designer.send_message(developer, "task_assignment", task_to_dev.to_dict())
-        message_to_artist_task = designer.send_message(artist, "task_assignment", task_to_artist.to_dict())
+        for task_info in tasks:
+            task_description = task_info["description"]
+            task_role = task_info["role"]
+            task_priority = task_info["priority"]
 
-        developer.receive_message(message_to_dev_task)
-        artist.receive_message(message_to_artist_task)
+            if task_role == "Developer":
+                task_to_dev = designer.create_task(task_description, developer, due_date, task_priority)
+                message_to_dev_task = designer.send_message(developer, "task_assignment", task_to_dev.to_dict())
+                developer.receive_message(message_to_dev_task)
+            elif task_role == "Artist":
+                task_to_artist = designer.create_task(task_description, artist, due_date, task_priority)
+                message_to_artist_task = designer.send_message(artist, "task_assignment", task_to_artist.to_dict())
+                artist.receive_message(message_to_artist_task)
+            elif task_role == "Tester":
+                task_to_tester = designer.create_task(task_description, tester, due_date, task_priority)
+                message_to_tester_task = designer.send_message(tester, "task_assignment", task_to_tester.to_dict())
+                tester.receive_message(message_to_tester_task)
 
-        # Developer and Artist work on their tasks
+        # Agents work on their tasks
         developer.update_task_status("Implement game mechanics", "In Progress")
-        artist.update_task_status("Create character sprites", "In Progress")
+        artist.update_task_status("Create visual assets", "In Progress")
 
         # Developer reports task status to Designer
         message_task_status_dev = developer.send_message(designer, "task_status", "Implement game mechanics: In Progress")
@@ -67,8 +78,8 @@ class InteractionManager:
         message_to_tester_assets = artist.send_message(tester, "game_assets", game_assets)
 
         # Mark Artist task as completed
-        artist.update_task_status("Create character sprites", "Completed")
-        message_task_status_artist_completed = artist.send_message(designer, "task_status", "Create character sprites: Completed")
+        artist.update_task_status("Create visual assets", "Completed")
+        message_task_status_artist_completed = artist.send_message(designer, "task_status", "Create visual assets: Completed")
         designer.receive_message(message_task_status_artist_completed)
 
         tester.receive_message(message_to_tester_assets)

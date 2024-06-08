@@ -1,4 +1,4 @@
-from agent import Agent
+from agents.agent import Agent
 from task import Task
 
 class GameDesigner(Agent):
@@ -33,3 +33,22 @@ class GameDesigner(Agent):
             {"description": "Test game functionality", "role": "Tester", "priority": "High"}
         ]
         return tasks
+
+    def assign_tasks(self, agents):
+        tasks = self.generate_tasks()
+        due_date = datetime.now() + timedelta(days=7)
+        task_tokens = []
+
+        for task_info in tasks:
+            task_description = task_info["description"]
+            task_role = task_info["role"]
+            task_priority = task_info["priority"]
+
+            for role, agent in agents.items():
+                if role.lower() == task_role.lower():
+                    task = self.create_task(task_description, agent, due_date, task_priority)
+                    task_token = self.send_message(agent, "task_assignment", task.to_dict())
+                    task_tokens.append(task_token)
+                    agent.receive_message(task_token)
+
+        return task_tokens
